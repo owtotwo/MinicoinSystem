@@ -68,7 +68,12 @@ public class Client {
 
     private static void menu() throws IOException {
         while (true) {
-            System.out.println("1. create user\n2. check user\n3. distribute minicoin\n4. take back minicoin\n5. logout");
+            System.out.println("1. create user\n" +
+                    "2. check user\n" +
+                    "3. distribute minicoin\n" +
+                    "4. take back minicoin\n" +
+                    "5. change admin password\n" +
+                    "6. logout");
             Scanner scanner = new Scanner(System.in);
             Integer choice = Integer.parseInt(scanner.nextLine());
             switch (choice) {
@@ -80,20 +85,23 @@ public class Client {
                     Client.dataOutputStream.writeUTF(username);
 
                     String usernameInfo = Client.dataInputStream.readUTF();
-                    if (!username.equals("available")) {
+                    if (!usernameInfo.equals("available")) {
                         System.out.println("This username has been used.");
                         continue;
                     }
 
-                    System.out.println("Please input new password: ");
-                    String password = scanner.nextLine();
+                    String password;
+                    while (true) {
+                        System.out.println("Please input new password: ");
+                        password = scanner.nextLine();
 
-                    System.out.println("Please input new password again: ");
-                    String passwordAgain = scanner.nextLine();
+                        System.out.println("Please input new password again: ");
+                        String passwordAgain = scanner.nextLine();
 
-                    if (!password.equals(passwordAgain)) {
+                        if (password.equals(passwordAgain)) {
+                            break;
+                        }
                         System.out.println("It is different between the passwords inputted two times.");
-                        continue;
                     }
 
                     try {
@@ -120,8 +128,8 @@ public class Client {
                     Client.dataOutputStream.writeUTF(username);
 
                     String usernameInfo = Client.dataInputStream.readUTF();
-                    if (username.equals("available")) {
-                        System.out.println("This username does not exist.");
+                    if (!usernameInfo.equals("existed")) {
+                        System.out.println("This user does not exist.");
                         continue;
                     }
 
@@ -131,8 +139,113 @@ public class Client {
                 }
                 break;
                 case 3: {
-                    Client.dataOutputStream.writeUTF("exit");
-                    System.out.println("GoodBye~");
+                    Client.dataOutputStream.writeUTF("distributeMinicoin");
+
+                    System.out.println("Please input the username: ");
+                    String username = scanner.nextLine();
+                    Client.dataOutputStream.writeUTF(username);
+
+                    String usernameInfo = Client.dataInputStream.readUTF();
+                    if (!usernameInfo.equals("existed")) {
+                        System.out.println("This user does not exist.");
+                        continue;
+                    }
+
+                    System.out.println("Please input the amount you want to distribute: ");
+                    String amountString = scanner.nextLine();
+                    Client.dataOutputStream.writeUTF(amountString);
+
+                    String result = Client.dataInputStream.readUTF();
+                    if (result.equals("success")) {
+                        System.out.println("Success to distribute Minicoin " + amountString);
+                    }
+                    else {
+                        System.out.println("Fail to distribute Minicoin " + amountString);
+                    }
+                }
+                break;
+                case 4: {
+                    Client.dataOutputStream.writeUTF("takeBackMinicoin");
+
+                    System.out.println("Please input the username: ");
+                    String username = scanner.nextLine();
+                    Client.dataOutputStream.writeUTF(username);
+
+                    String usernameInfo = Client.dataInputStream.readUTF();
+                    if (!usernameInfo.equals("existed")) {
+                        System.out.println("This user does not exist.");
+                        continue;
+                    }
+
+                    System.out.println("Please input the amount you want to take back: ");
+                    String amountString = scanner.nextLine();
+                    Client.dataOutputStream.writeUTF(amountString);
+
+                    String result = Client.dataInputStream.readUTF();
+                    if (result.equals("success")) {
+                        System.out.println("Success to take back Minicoin " + amountString);
+                    }
+                    else if (result.equals("notEnough")) {
+                        System.out.println("Its Minicoin is not enough to take back");
+                    }
+                    else {
+                        System.out.println("Fail to take back " + amountString + " Minicoin");
+                    }
+                }
+                break;
+                case 5: {
+                    Client.dataOutputStream.writeUTF("changePassword");
+
+                    System.out.println("Please input your old admin password: ");
+                    String oldPassword = scanner.nextLine();
+                    try {
+                        MessageDigest md5 = MessageDigest.getInstance("MD5");
+                        byte[] cipher = md5.digest(oldPassword.getBytes("UTF-8"));
+                        String encryptedPassword = (new HexBinaryAdapter()).marshal(cipher);
+                        Client.dataOutputStream.writeUTF(encryptedPassword);
+                    } catch (NoSuchAlgorithmException e) {
+                        e.printStackTrace();
+                    }
+
+                    String result = Client.dataInputStream.readUTF();
+                    if (!result.equals("match")) {
+                        System.out.println("The old admin password does not match.");
+                        break;
+                    }
+
+                    String newPassword;
+                    while (true) {
+                        System.out.println("Please input your new admin password: ");
+                        newPassword = scanner.nextLine();
+
+                        System.out.println("Please input your new admin password again: ");
+                        String newPasswordAgain = scanner.nextLine();
+
+                        if (newPassword.equals(newPasswordAgain)) {
+                            break;
+                        }
+                        System.out.println("It is different between the passwords inputted two times.");
+                    }
+
+                    try {
+                        MessageDigest md5 = MessageDigest.getInstance("MD5");
+                        byte[] cipher = md5.digest(newPassword.getBytes("UTF-8"));
+                        String encryptedPassword = (new HexBinaryAdapter()).marshal(cipher);
+                        Client.dataOutputStream.writeUTF(encryptedPassword);
+                    } catch (NoSuchAlgorithmException e) {
+                        e.printStackTrace();
+                    }
+
+                    result = Client.dataInputStream.readUTF();
+                    if (result.equals("success")) {
+                        System.out.println("Success to change the admin password");
+                    } else {
+                        System.out.println("Fail to change the admin password");
+                    }
+                }
+                break;
+                case 6: {
+                    System.out.println("Success to Logout");
                     return;
                 }
             }

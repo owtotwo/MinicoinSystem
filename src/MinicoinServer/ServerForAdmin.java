@@ -20,7 +20,7 @@ public class ServerForAdmin extends Thread {
     private Admin admin;
 
     private static final Set<String> INSTRUCTIONS = new HashSet<String>(Arrays.asList(new String[] {
-            "login", "exit"
+            "login", "createUser", "checkUser", "distributeMinicoin", "takeBackMinicoin", "changePassword", "exit"
     }));
 
     public ServerForAdmin(List<User> users) {
@@ -59,7 +59,7 @@ public class ServerForAdmin extends Thread {
         while (isContinue) {
             String instruction = this.getInstruction();
             if (!INSTRUCTIONS.contains(instruction)) {
-                System.err.println("Unknown Instruction");
+                System.err.println("Unknown Instruction [" + instruction + "]");
                 break;
             }
             isContinue = this.solveInstruction(instruction);
@@ -86,8 +86,10 @@ public class ServerForAdmin extends Thread {
                 String username = this.dataInputStream.readUTF();
                 boolean isAvailable = isUsernameAvailable(username);
                 if (isAvailable) {
+                    System.out.println("the username [" + username + "] is available");
                     this.dataOutputStream.writeUTF("available");
                 } else {
+                    System.out.println("the username [" + username + "] is unavailable");
                     this.dataOutputStream.writeUTF("unavailable");
                     break;
                 }
@@ -100,9 +102,83 @@ public class ServerForAdmin extends Thread {
 
             }
             break;
-            case "exit": {
-                return false;
+            case "checkUser": {
+                String username = this.dataInputStream.readUTF();
+                boolean isExisted = isUserExisted(username);
+                if (isExisted) {
+                    this.dataOutputStream.writeUTF("existed");
+                } else {
+                    System.out.println("the user [" + username + "] is not existed");
+                    this.dataOutputStream.writeUTF("notExisted");
+                    break;
+                }
+                User u = getUser(username);
+                Double balance = u.getBalance();
+                this.dataOutputStream.writeUTF(balance.toString());
+                System.out.println("Success to check the user " + username + "'s information");
             }
+            break;
+            case "distributeMinicoin": {
+                String username = this.dataInputStream.readUTF();
+                boolean isExisted = isUserExisted(username);
+                if (isExisted) {
+                    this.dataOutputStream.writeUTF("existed");
+                } else {
+                    System.out.println("the user [" + username + "] is not existed");
+                    this.dataOutputStream.writeUTF("notExisted");
+                    break;
+                }
+                String amountString = this.dataInputStream.readUTF();
+                Double amount = Double.parseDouble(amountString);
+                User u = getUser(username);
+                u.addBalance(amount);
+                System.out.println("Success to distribute Minicoin " + amount.toString());
+                this.dataOutputStream.writeUTF("success");
+            }
+            break;
+            case "takeBackMinicoin": {
+                String username = this.dataInputStream.readUTF();
+                boolean isExisted = isUserExisted(username);
+                if (isExisted) {
+                    this.dataOutputStream.writeUTF("existed");
+                } else {
+                    System.out.println("the user [" + username + "] is not existed");
+                    this.dataOutputStream.writeUTF("notExisted");
+                    break;
+                }
+                String amountString = this.dataInputStream.readUTF();
+                Double amount = Double.parseDouble(amountString);
+                User u = getUser(username);
+                Double balanceBefore = u.getBalance();
+                if (balanceBefore < amount) {
+                    System.out.println("Its Minicoin is not enough to take back");
+                    this.dataOutputStream.writeUTF("notEnough");
+                } else {
+                    u.reduceBalance(amount);
+                    Double balanceNow = u.getBalance();
+                    Double reduceAmount = balanceBefore - balanceNow;
+                    System.out.println("Success to take back Minicoin " + reduceAmount.toString());
+                    this.dataOutputStream.writeUTF("success");
+                }
+            }
+            break;
+            case "changePassword": {
+                String oldPassword = this.dataInputStream.readUTF();
+                if (this.checkAdminPassword(oldPassword)) {
+                    this.dataOutputStream.writeUTF("match");
+                } else {
+                    this.dataOutputStream.writeUTF("notMatch");
+                    System.out.println("The old password does not match");
+                    break;
+                }
+
+                String newPassword = this.dataInputStream.readUTF();
+                this.changeAdminPassword(newPassword);
+                this.dataOutputStream.writeUTF("success");
+                System.out.println("Success to change admin password");
+            }
+            break;
+            case "exit":
             default: {
                 return false;
             }
@@ -116,6 +192,10 @@ public class ServerForAdmin extends Thread {
                 .count() == 0;
     }
 
+    private boolean isUserExisted(String username) {
+        return !isUsernameAvailable(username);
+    }
+
     private boolean checkUsernameAndPassword(String username, String password) {
         return userList.stream()
                 .filter(user -> (user.getUsername().equals(username) && user.getPassword().equals(password)))
@@ -124,5 +204,14 @@ public class ServerForAdmin extends Thread {
 
     private boolean checkAdminPassword(String password) {
         return this.admin.getPassword().equals(password);
+    }
+
+    private void changeAdminPassword(String password) { this.admin.setPassword(password); }
+
+    private User getUser(String username) {
+        return userList.stream()
+                .filter(user -> user.getUsername().equals(username))
+                .findFirst()
+                .get();
     }
 }

@@ -5,6 +5,12 @@ public class User {
     private String password;
     private Double balance = 0.0;
 
+    public User(String username, String password, Double balance) {
+        this.username = username;
+        this.password = password;
+        this.balance = balance;
+    }
+
     public User(String username, String password) {
         this.username = username;
         this.password = password;
