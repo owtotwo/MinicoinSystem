@@ -10,6 +10,20 @@ public class Admin {
 
     public Admin() {
         this.password = "admin";
+        this.encryptPassword();
+    }
+
+    public Admin(String password) { this.password = password; }
+
+    public String getPassword() {
+        return password;
+    }
+
+    public void setPassword(String password) {
+        this.password = password;
+    }
+
+    private void encryptPassword() {
         try {
             MessageDigest md5 = MessageDigest.getInstance("MD5");
             byte[] cipher = md5.digest(this.password.getBytes("UTF-8"));
@@ -19,17 +33,5 @@ public class Admin {
         } catch (UnsupportedEncodingException e) {
             e.printStackTrace();
         }
-    }
-
-    public Admin(String password) {
-        this.password = password;
-    }
-
-    public String getPassword() {
-        return password;
-    }
-
-    public void setPassword(String password) {
-        this.password = password;
     }
 }

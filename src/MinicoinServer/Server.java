@@ -1,10 +1,13 @@
 package MinicoinServer;
 
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 public class Server {
 
-    private static List<User> userList;
+    private static List<User> userList = new ArrayList<User>();
+    private static Storage storage;
 
     public Server() {
 
@@ -13,7 +16,8 @@ public class Server {
     public static void main(String[] args) {
         System.out.println("This is a Server.");
 
-        ServerForAdmin serverForAdmin = new ServerForAdmin(userList);
+        storage = new Storage();
+        ServerForAdmin serverForAdmin = new ServerForAdmin(storage);
         serverForAdmin.start();
 
     }
