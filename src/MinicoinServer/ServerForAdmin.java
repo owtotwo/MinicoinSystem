@@ -92,11 +92,10 @@ public class ServerForAdmin extends Thread {
                     break;
                 }
                 String encryptedPassword = this.dataInputStream.readUTF();
-                User user = new User(username, encryptedPassword);
-                storage.getUserList().add(user);
+                storage.addUser(username, encryptedPassword);
                 this.dataOutputStream.writeUTF("success");
 
-                System.out.println("Now there are " + storage.getUserList().size() + " users in system");
+                System.out.println("Now there are " + storage.getUserListSize() + " users in system");
 
             }
             break;

@@ -22,19 +22,19 @@ public class Storage {
     private Admin admin = new Admin();
     private List<User> userList = new ArrayList<User>();
 
-    public Admin getAdmin() {
+    private Admin getAdmin() {
         return admin;
     }
 
-    public void setAdmin(Admin admin) {
+    private void setAdmin(Admin admin) {
         this.admin = admin;
     }
 
-    public List<User> getUserList() {
+    private List<User> getUserList() {
         return userList;
     }
 
-    public void setUserList(List<User> userList) {
+    private void setUserList(List<User> userList) {
         this.userList = userList;
     }
 
@@ -146,6 +146,10 @@ public class Storage {
     public String getAdminPassword() { return admin.getPassword(); }
 
     public String getUserPassword(String username) { return getUser(username).getPassword(); }
+
+    public void addUser(String username, String password) { userList.add(new User(username, password)); save(); }
+
+    public Integer getUserListSize() { return userList.size(); }
 
     public boolean isUsernameAvailable(String username) {
         return userList.stream()

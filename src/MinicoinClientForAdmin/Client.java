@@ -7,6 +7,9 @@ import java.io.IOException;
 import java.net.Socket;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
 import java.util.Scanner;
 
 public class Client {
@@ -33,8 +36,25 @@ public class Client {
     private static void mailLoop() throws IOException {
         while (true) {
             System.out.println("1. login\n2. exit");
+
             Scanner scanner = new Scanner(System.in);
-            Integer choice = Integer.parseInt(scanner.nextLine());
+
+            Integer choice;
+            List<Integer> validChoices = new ArrayList<Integer>(Arrays.asList(1, 2));
+            while (true) {
+                System.out.println("Please input your choice:");
+                try {
+                    choice = Integer.parseInt(scanner.nextLine());
+                    if (validChoices.contains(choice)) {
+                        break;
+                    } else {
+                        System.err.println("Not a valid choice number");
+                    }
+                } catch (NumberFormatException e) {
+                    System.err.println("Not a valid number");
+                }
+            }
+
             switch (choice) {
                 case 1: {
                     Client.dataOutputStream.writeUTF("login");
@@ -78,8 +98,25 @@ public class Client {
                     "4. take back minicoin\n" +
                     "5. change admin password\n" +
                     "6. logout");
+
             Scanner scanner = new Scanner(System.in);
-            Integer choice = Integer.parseInt(scanner.nextLine());
+
+            Integer choice;
+            List<Integer> validChoices = new ArrayList<Integer>(Arrays.asList(1, 2, 3, 4, 5, 6));
+            while (true) {
+                System.out.println("Please input your choice:");
+                try {
+                    choice = Integer.parseInt(scanner.nextLine());
+                    if (validChoices.contains(choice)) {
+                        break;
+                    } else {
+                        System.err.println("Not a valid choice number");
+                    }
+                } catch (NumberFormatException e) {
+                    System.err.println("Not a valid number");
+                }
+            }
+
             switch (choice) {
                 case 1: {
                     Client.dataOutputStream.writeUTF("createUser");
