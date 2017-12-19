@@ -16,9 +16,10 @@ public class Server {
     public static void main(String[] args) {
         System.out.println("This is a Server.");
 
-        storage = new Storage();
+        storage = Storage.getInstance();
         ServerForAdmin serverForAdmin = ServerForAdmin.getInstance(storage);
         serverForAdmin.start();
-
+        MultiThreadServerForUser serverForUser = MultiThreadServerForUser.getInstance(storage);
+        serverForUser.start();
     }
 }

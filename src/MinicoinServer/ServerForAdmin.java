@@ -35,6 +35,7 @@ public class ServerForAdmin extends Thread {
         }
     }
 
+    // Singleton
     public static synchronized ServerForAdmin getInstance(Storage storage) {
         if (instance == null) {
             instance = new ServerForAdmin(storage);
@@ -198,6 +199,4 @@ public class ServerForAdmin extends Thread {
     private boolean checkAdminPassword(String password) {
         return storage.getAdminPassword().equals(password);
     }
-
-    public boolean checkPassword(String username, String password) { return storage.getUserPassword(username).equals(password); }
 }

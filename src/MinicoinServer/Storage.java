@@ -11,6 +11,8 @@ import java.util.function.Function;
 import java.util.stream.Stream;
 
 public class Storage {
+    private static Storage instance = null;
+
     private static final Path userPath = Paths.get(System.getProperty("user.dir"));
     private static final Path dataFilePath = Paths.get(userPath.toString(), "Minicoin.db");
 
@@ -22,23 +24,7 @@ public class Storage {
     private Admin admin = new Admin();
     private List<User> userList = new ArrayList<User>();
 
-    private Admin getAdmin() {
-        return admin;
-    }
-
-    private void setAdmin(Admin admin) {
-        this.admin = admin;
-    }
-
-    private List<User> getUserList() {
-        return userList;
-    }
-
-    private void setUserList(List<User> userList) {
-        this.userList = userList;
-    }
-
-    public Storage() {
+    private Storage() {
         try {
             load();
             save();
@@ -46,6 +32,14 @@ public class Storage {
             System.err.println(e.getMessage());
             e.printStackTrace();
         }
+    }
+
+    // Singleton
+    public static synchronized Storage getInstance() {
+        if (instance == null) {
+            instance = new Storage();
+        }
+        return instance;
     }
 
     protected void finalize() {
@@ -134,29 +128,31 @@ public class Storage {
         }
     }
 
-    public void changeAdminPassword(String password) { admin.setPassword(password); save(); }
+    public synchronized void changeAdminPassword(String password) { admin.setPassword(password); save(); }
 
-    public void addUserBalance(String username, Double amount) { getUser(username).addBalance(amount); save(); }
+    public synchronized void changeUserPassword(String username, String password) { getUser(username).setPassword(password); save(); }
 
-    public void reduceUserBalance(String username, Double amount) { getUser(username).reduceBalance(amount); save(); }
+    public synchronized void addUserBalance(String username, Double amount) { getUser(username).addBalance(amount); save(); }
 
-    public Double getUserBalance(String username) { return getUser(username).getBalance(); }
+    public synchronized void reduceUserBalance(String username, Double amount) { getUser(username).reduceBalance(amount); save(); }
 
-    public String getAdminPassword() { return admin.getPassword(); }
+    public synchronized Double getUserBalance(String username) { return getUser(username).getBalance(); }
 
-    public String getUserPassword(String username) { return getUser(username).getPassword(); }
+    public synchronized String getAdminPassword() { return admin.getPassword(); }
 
-    public void addUser(String username, String password) { userList.add(new User(username, password)); save(); }
+    public synchronized String getUserPassword(String username) { return getUser(username).getPassword(); }
 
-    public Integer getUserListSize() { return userList.size(); }
+    public synchronized void addUser(String username, String password) { userList.add(new User(username, password)); save(); }
 
-    public boolean isUsernameAvailable(String username) {
+    public synchronized Integer getUserListSize() { return userList.size(); }
+
+    public synchronized boolean isUsernameAvailable(String username) {
         return userList.stream()
                 .filter(user -> user.getUsername().equals(username))
                 .count() == 0;
     }
 
-    private User getUser(String username) {
+    private synchronized User getUser(String username) {
         return userList.stream()
                 .filter(user -> user.getUsername().equals(username))
                 .findFirst()
