@@ -11,6 +11,8 @@ import java.util.List;
 import java.util.Set;
 
 public class ServerForAdmin extends Thread {
+    private static ServerForAdmin instance = null;
+
     private ServerSocket serverSocket;
     private Socket socket;
     private DataInputStream dataInputStream;
@@ -22,7 +24,7 @@ public class ServerForAdmin extends Thread {
             "login", "createUser", "checkUser", "distributeMinicoin", "takeBackMinicoin", "changePassword", "exit"
     ));
 
-    public ServerForAdmin(Storage storage) {
+    private ServerForAdmin(Storage storage) {
         this.storage = storage;
         try {
             this.serverSocket = new ServerSocket(10086);
@@ -31,6 +33,13 @@ public class ServerForAdmin extends Thread {
             e.printStackTrace();
             return;
         }
+    }
+
+    public static synchronized ServerForAdmin getInstance(Storage storage) {
+        if (instance == null) {
+            instance = new ServerForAdmin(storage);
+        }
+        return instance;
     }
 
     @Override

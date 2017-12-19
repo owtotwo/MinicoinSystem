@@ -41,11 +41,10 @@ public class Storage {
     public Storage() {
         try {
             load();
+            save();
         } catch (StorageException e) {
             System.err.println(e.getMessage());
             e.printStackTrace();
-        } finally {
-            save();
         }
     }
 
@@ -86,11 +85,11 @@ public class Storage {
             this.admin = new Admin(adminPassword);
 
             assertLine(lines, 5, dataFileUserLabel);
-            for (Integer i = 0; lines.length > 6 + i + 3; i++) {
-                String username = lines[6 + i + 0];
-                String password = lines[6 + i + 1];
-                String balance = lines[6 + i + 2];
-                assertLine(lines, 6 + i + 3, dataFileSeparator);
+            for (Integer i = 0; lines.length > 6 + i * 4 + 3; i++) {
+                String username = lines[6 + i * 4 + 0];
+                String password = lines[6 + i * 4 + 1];
+                String balance = lines[6 + i * 4 + 2];
+                assertLine(lines, 6 + i * 4 + 3, dataFileSeparator);
                 User user = new User(username, password, Double.parseDouble(balance));
                 this.userList.add(user);
             }

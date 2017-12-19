@@ -17,7 +17,7 @@ public class Server {
         System.out.println("This is a Server.");
 
         storage = new Storage();
-        ServerForAdmin serverForAdmin = new ServerForAdmin(storage);
+        ServerForAdmin serverForAdmin = ServerForAdmin.getInstance(storage);
         serverForAdmin.start();
 
     }
