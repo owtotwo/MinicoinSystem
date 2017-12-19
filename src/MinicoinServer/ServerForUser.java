@@ -7,8 +7,10 @@ import java.net.Socket;
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Set;
+import java.util.logging.Logger;
 
 public class ServerForUser extends Thread {
+    private final static Logger logger = Logger.getLogger(ServerForAdmin.class.getName());
 
     private Socket socket;
     private DataInputStream dataInputStream;
@@ -35,10 +37,10 @@ public class ServerForUser extends Thread {
 
     @Override
     public void run() {
-        System.out.println("A new Sub-Server for a User is running in thread " + Thread.currentThread());
+        logger.info("A new Sub-Server for a User is running in thread " + Thread.currentThread());
         try {
             this.mainLoop();
-            System.out.println("Over.");
+            logger.info("Over.");
         }
         catch (IOException e) {
             e.printStackTrace();
@@ -62,12 +64,12 @@ public class ServerForUser extends Thread {
     }
 
     private boolean solveInstruction(String instruction) throws IOException {
-        System.out.println("Solve instruction [" + instruction + "]");
+        logger.info("Solve instruction [" + instruction + "]");
         switch (instruction) {
             case "login": {
                 String username = this.dataInputStream.readUTF();
                 if (!this.isUserExisted(username)) {
-                    System.out.println("This user does not exist.");
+                    logger.info("This user does not exist.");
                     this.dataOutputStream.writeUTF("notExisted");
                     break;
                 } else {
@@ -94,7 +96,7 @@ public class ServerForUser extends Thread {
                 if (isExisted) {
                     this.dataOutputStream.writeUTF("existed");
                 } else {
-                    System.out.println("the user [" + distUsername + "] is not existed");
+                    logger.info("the user [" + distUsername + "] is not existed");
                     this.dataOutputStream.writeUTF("notExisted");
                     break;
                 }
@@ -102,14 +104,14 @@ public class ServerForUser extends Thread {
                 Double amount = Double.parseDouble(amountString);
                 Double balanceBefore = storage.getUserBalance(this.username);
                 if (balanceBefore < amount) {
-                    System.out.println("Its Minicoin is not enough to transfer");
+                    logger.info("Its Minicoin is not enough to transfer");
                     this.dataOutputStream.writeUTF("notEnough");
                 } else {
                     storage.reduceUserBalance(this.username, amount);
                     storage.addUserBalance(distUsername, amount);
                     Double balanceNow = storage.getUserBalance(this.username);
                     Double reduceAmount = balanceBefore - balanceNow;
-                    System.out.println("Success to transfer Minicoin " + reduceAmount.toString() +
+                    logger.info("Success to transfer Minicoin " + reduceAmount.toString() +
                             " from " + this.username + " to " + distUsername);
                     this.dataOutputStream.writeUTF("success");
                 }
@@ -121,14 +123,14 @@ public class ServerForUser extends Thread {
                     this.dataOutputStream.writeUTF("match");
                 } else {
                     this.dataOutputStream.writeUTF("notMatch");
-                    System.out.println("The old password does not match");
+                    logger.info("The old password does not match");
                     break;
                 }
 
                 String newPassword = this.dataInputStream.readUTF();
                 storage.changeUserPassword(this.username, newPassword);
                 this.dataOutputStream.writeUTF("success");
-                System.out.println("Success to change admin password");
+                logger.info("Success to change admin password");
             }
             break;
             case "exit":
