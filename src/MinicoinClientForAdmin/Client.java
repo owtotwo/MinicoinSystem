@@ -195,6 +195,14 @@ public class Client {
 
                     System.out.println("Please input the amount you want to distribute: ");
                     String amountString = scanner.nextLine();
+                    Double amount;
+                    try {
+                        amount = Double.parseDouble(amountString);
+                    } catch (NumberFormatException e) {
+                        System.out.println("Invalid number, fail to distribute");
+                        break;
+                    }
+                    amountString = amount.toString();
                     Client.dataOutputStream.writeUTF(amountString);
 
                     String result = Client.dataInputStream.readUTF();
@@ -221,6 +229,14 @@ public class Client {
 
                     System.out.println("Please input the amount you want to take back: ");
                     String amountString = scanner.nextLine();
+                    Double amount;
+                    try {
+                        amount = Double.parseDouble(amountString);
+                    } catch (NumberFormatException e) {
+                        System.out.println("Invalid number, fail to take back");
+                        break;
+                    }
+                    amountString = amount.toString();
                     Client.dataOutputStream.writeUTF(amountString);
 
                     String result = Client.dataInputStream.readUTF();

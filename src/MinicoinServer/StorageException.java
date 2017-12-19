@@ -1,6 +1,6 @@
 package MinicoinServer;
 
-public class StorageException extends MinicoinSystemException {
+public class StorageException extends Exception {
     public StorageException() {
     }
 
